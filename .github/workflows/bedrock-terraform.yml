@@ -57,11 +57,21 @@ jobs:
 
           cat response.json | jq -r '.content[0].text' > generated_terraform.tf
 
+      - name: Commit generated file
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -b auto/generated-terraform
+          git add generated_terraform.tf
+          git commit -m "Add auto-generated Terraform code from Amazon Q"
+          git push origin auto/generated-terraform
+
       - name: Commit and create PR
         uses: devops-infra/action-pull-request@v0.5.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_title: "Auto-generated Terraform code from Amazon Q"
-          pr_body: "This PR contains Terraform code generated automatically from the latest dev branch push."
-          pr_branch: "auto/generated-terraform"
+          title: "Auto-generated Terraform code from Amazon Q"
+          body: "This PR contains Terraform code generated automatically from the latest dev branch push."
+          source_branch: "auto/generated-terraform"
+          target_branch: "dev"
 
