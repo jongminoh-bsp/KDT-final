@@ -19,13 +19,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
+      - name: Prepare JSON body
+        run: |
+          echo '{
+            "inputText": "Hello from dev branch push",
+            "textGenerationConfig": {
+              "maxTokenCount": 50
+            }
+          }' > body.json
+
       - name: Invoke Bedrock model
         run: |
           aws bedrock-runtime invoke-model \
             --model-id anthropic.claude-3-5-sonnet-20240620-v1:0 \
             --content-type application/json \
             --accept application/json \
-            --body '{"inputText": "Hello from GitHub Actions", "textGenerationConfig": {"maxTokenCount": 50}}' \
+            --body fileb://body.json \
             response.json
 
           echo "Model response:"
