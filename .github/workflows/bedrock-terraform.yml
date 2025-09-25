@@ -66,6 +66,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          git push origin --delete auto/generated-terraform || true
           git checkout -b auto/generated-terraform
           git add generated_terraform.tf
           git commit -m "Add auto-generated Terraform code from Amazon Q"
