@@ -8,6 +8,9 @@ on:
     paths:
       - 'app/**'
 
+permissions:
+  contents: write
+
 jobs:
   generate-terraform:
     runs-on: ubuntu-latest
