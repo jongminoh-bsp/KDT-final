@@ -24,20 +24,20 @@ jobs:
 
       - name: Prepare JSON body for Amazon Q
         run: |
-          CODE_CONTENT=$(tar -czf - ./ | base64)
-
-          echo '{
+          cat > body.json << 'EOF'
+          {
             "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": 2000,
             "messages": [
               {
                 "role": "user",
-                "content": "Generate Terraform code only based on the following application code: '"$CODE_CONTENT"'"
+                "content": "Generate Terraform code for a Flask web application with the following requirements: 1) ECS Fargate service 2) Application Load Balancer 3) RDS MySQL database 4) VPC with public/private subnets 5) Security groups for web and database tiers. Return only the Terraform code without explanations."
               }
             ],
             "temperature": 0.2,
             "top_p": 0.9
-          }' > body.json
+          }
+          EOF
 
       - name: Invoke Amazon Q / Bedrock
         run: |
