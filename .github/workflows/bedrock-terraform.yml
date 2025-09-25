@@ -1,0 +1,67 @@
+name: Generate Terraform from Code
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'app/**'
+
+jobs:
+  generate-terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Prepare JSON body for Amazon Q
+        run: |
+          cat > body.json << 'EOF'
+          {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 2000,
+            "messages": [
+              {
+                "role": "user",
+                "content": "Generate Terraform code for a Flask web application with the following requirements: 1) ECS Fargate service 2) Application Load Balancer 3) RDS MySQL database 4) VPC with public/private subnets 5) Security groups for web and database tiers. Return only the Terraform code without explanations."
+              }
+            ],
+            "temperature": 0.2,
+            "top_p": 0.9
+          }
+          EOF
+
+      - name: Invoke Amazon Q / Bedrock
+        run: |
+          for i in {1..5}; do
+            if aws bedrock-runtime invoke-model \
+              --model-id anthropic.claude-3-5-sonnet-20240620-v1:0 \
+              --content-type application/json \
+              --accept application/json \
+              --body fileb://body.json \
+              response.json; then
+              break
+            else
+              echo "Attempt $i failed, waiting 30 seconds..."
+              sleep 30
+            fi
+          done
+
+          cat response.json | jq -r '.content[0].text' > generated_terraform.tf
+
+      - name: Commit and create PR
+        uses: devops-infra/action-pull-request@v0.5.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_title: "Auto-generated Terraform code from Amazon Q"
+          pr_body: "This PR contains Terraform code generated automatically from the latest dev branch push."
+          pr_branch: "auto/generated-terraform"
+
