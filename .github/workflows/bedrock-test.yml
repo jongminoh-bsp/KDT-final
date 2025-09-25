@@ -22,7 +22,7 @@ jobs:
       - name: Prepare JSON body
         run: |
           echo '{
-            "anthropic_version": "bedrock-2023-05-31",
+            "anthropic_version": "bedrock-2024-06-20",
             "max_tokens": 50,
             "messages": [
               {
@@ -37,7 +37,7 @@ jobs:
       - name: Invoke Bedrock model
         run: |
           aws bedrock-runtime invoke-model \
-            --model-id anthropic.claude-3-5-sonnet-20241022-v2:0 \
+            --model-id anthropic.claude-3-5-sonnet-20240620-v1:0 \
             --content-type application/json \
             --accept application/json \
             --body fileb://body.json \
