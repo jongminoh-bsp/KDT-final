@@ -22,10 +22,10 @@ jobs:
       - name: Prepare JSON body
         run: |
           echo '{
-            "inputText": "Hello from dev branch push",
-            "textGenerationConfig": {
-              "maxTokenCount": 50
-            }
+            "prompt": "Hello from dev branch push",
+            "max_tokens_to_sample": 50,
+            "temperature": 0.2,
+            "top_p": 0.9
           }' > body.json
 
       - name: Invoke Bedrock model
