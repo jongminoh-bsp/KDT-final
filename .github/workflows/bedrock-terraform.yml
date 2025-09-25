@@ -41,12 +41,19 @@ jobs:
 
       - name: Invoke Amazon Q / Bedrock
         run: |
-          aws bedrock-runtime invoke-model \
-            --model-id anthropic.claude-3-5-sonnet-20240620-v1:0 \
-            --content-type application/json \
-            --accept application/json \
-            --body fileb://body.json \
-            response.json
+          for i in {1..5}; do
+            if aws bedrock-runtime invoke-model \
+              --model-id anthropic.claude-3-5-sonnet-20240620-v1:0 \
+              --content-type application/json \
+              --accept application/json \
+              --body fileb://body.json \
+              response.json; then
+              break
+            else
+              echo "Attempt $i failed, waiting 30 seconds..."
+              sleep 30
+            fi
+          done
 
           cat response.json | jq -r '.content[0].text' > generated_terraform.tf
 
