@@ -1,7 +1,9 @@
 name: Bedrock Test
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - dev
 
 jobs:
   bedrock-test:
@@ -20,7 +22,7 @@ jobs:
       - name: Invoke Bedrock model
         run: |
           aws bedrock-runtime invoke-model \
-            --model-id Claude 3.5 Sonnet \
+            --model-id anthropic.claude-3-5-sonnet-20240620-v1:0 \
             --content-type application/json \
             --accept application/json \
             --body '{"inputText": "Hello from GitHub Actions", "textGenerationConfig": {"maxTokenCount": 50}}' \
